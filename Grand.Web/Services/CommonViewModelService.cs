@@ -31,6 +31,7 @@ using Grand.Services.Stores;
 using Grand.Services.Topics;
 using Grand.Web.Extensions;
 using Grand.Web.Infrastructure.Cache;
+using Grand.Web.Interfaces;
 using Grand.Web.Models.Catalog;
 using Grand.Web.Models.Common;
 using Grand.Web.Models.Topics;
@@ -45,7 +46,7 @@ using System.Text;
 
 namespace Grand.Web.Services
 {
-    public partial class CommonViewModelService: ICommonViewModelService
+    public partial class CommonViewModelService : ICommonViewModelService
     {
         private readonly ICacheManager _cacheManager;
         private readonly IStoreContext _storeContext;
@@ -82,8 +83,9 @@ namespace Grand.Web.Services
         private readonly VendorSettings _vendorSettings;
         private readonly CommonSettings _commonSettings;
         private readonly CaptchaSettings _captchaSettings;
+        private readonly ShoppingCartSettings _shoppingCartSettings;
 
-        public CommonViewModelService(ICacheManager cacheManager, 
+        public CommonViewModelService(ICacheManager cacheManager,
             IStoreContext storeContext,
             IStoreService storeService,
             IThemeContext themeContext,
@@ -117,7 +119,8 @@ namespace Grand.Web.Services
             NewsSettings newsSettings,
             VendorSettings vendorSettings,
             CommonSettings commonSettings,
-            CaptchaSettings captchaSettings
+            CaptchaSettings captchaSettings,
+            ShoppingCartSettings shoppingCartSettings
             )
         {
             this._cacheManager = cacheManager;
@@ -156,6 +159,7 @@ namespace Grand.Web.Services
             this._vendorSettings = vendorSettings;
             this._commonSettings = commonSettings;
             this._captchaSettings = captchaSettings;
+            this._shoppingCartSettings = shoppingCartSettings;
         }
         public virtual LogoModel PrepareLogo()
         {
@@ -272,7 +276,7 @@ namespace Grand.Web.Services
             };
             return model;
         }
-        
+
         public virtual void SetTaxType(int customerTaxType)
         {
             var taxDisplayType = (TaxDisplayType)Enum.ToObject(typeof(TaxDisplayType), customerTaxType);
@@ -343,6 +347,7 @@ namespace Grand.Web.Services
                 ShoppingCartEnabled = _permissionService.Authorize(StandardPermissionProvider.EnableShoppingCart),
                 WishlistEnabled = _permissionService.Authorize(StandardPermissionProvider.EnableWishlist),
                 AllowPrivateMessages = isRegister && _forumSettings.AllowPrivateMessages,
+                MiniShoppingCartEnabled = _shoppingCartSettings.MiniShoppingCartEnabled
             };
             //performance optimization (use "HasShoppingCartItems" property)
             if (customer.ShoppingCartItems.Any())
@@ -441,6 +446,7 @@ namespace Grand.Web.Services
                 RecommendedProductsEnabled = _catalogSettings.RecommendedProductsEnabled,
                 NewProductsEnabled = _catalogSettings.NewProductsEnabled,
                 DisplayTaxShippingInfoFooter = _catalogSettings.DisplayTaxShippingInfoFooter,
+                InclTax = _workContext.TaxDisplayType == TaxDisplayType.IncludingTax,
                 HidePoweredByGrandNode = _storeInformationSettings.HidePoweredByGrandNode,
                 AllowCustomersToApplyForVendorAccount = _vendorSettings.AllowCustomersToApplyForVendorAccount,
                 Topics = cachedTopicModel
@@ -792,7 +798,7 @@ namespace Grand.Web.Services
 
             model.SuccessfullySent = true;
             model.Result = _localizationService.GetResource("ContactUs.YourEnquiryHasBeenSent");
-            
+
             return model;
         }
         public virtual ContactVendorModel PrepareContactVendor(Vendor vendor)

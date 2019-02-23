@@ -1,7 +1,8 @@
 ﻿using Grand.Core.Domain.News;
 using Grand.Framework.Components;
-using Grand.Web.Services;
+using Grand.Web.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Grand.Web.ViewComponents
@@ -23,6 +24,9 @@ namespace Grand.Web.ViewComponents
                 return Content("");
 
             var model = await Task.Run(() => _newsViewModelService.PrepareHomePageNewsItems());
+            if (!model.NewsItems.Any())
+                return Content("");
+
             return View(model);
         }
     }

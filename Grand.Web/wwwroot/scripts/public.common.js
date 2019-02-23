@@ -156,34 +156,6 @@ function dataCountdown() {
     });
 }
 
-// discount ribbons engine
-
-function discountEngine() {
-    $(".card.gen, .prod-list").each(function () {
-        if ($(this).find(".old-price").text().length > 0) {
-            var actual_p = $(this).find(".actual-price").text().replace(",", "").replace(/^\D+/g, '');
-            var old_p = $(this).find(".old-price").text().replace(",", "").replace(/^\D+/g, '');
-            var promo = Math.abs(Math.round((1 - actual_p / old_p) * 100));
-            if (isNaN(promo)) {
-                $(this).parent().parent().find(".change-percent").remove();
-            } else {
-                if (parseInt(promo) <= 0) {
-                    $(this).find(".new-product-label").addClass("no-promo");
-                }
-                else {
-                    var promo = "-" + promo + "%";
-                    $(this).parent().find(".change-percent").text(promo).css("opacity", "1");
-                    $(this).find(".new-product-label").addClass("with-promo");
-                }
-            }
-        }
-        else {
-            $(this).find(".change-percent").remove();
-            $(this).find(".new-product-label").addClass("no-promo");
-        }
-    });
-}
-
 // left-side canvas
 
 function LeftSide() {
@@ -202,7 +174,6 @@ $(document).ready(function () {
     itemsStatistics();
     ratingSubFunc();
     IpadMenuFix();
-    discountEngine();
     dataCountdown();
     BackToTop();
 
@@ -566,7 +537,8 @@ function deletecartitem(href) {
         type: "POST",
         url: href,
         success: function (data) {
-            $(flyoutcartselector).replaceWith(data.flyoutshoppingcart);
+            var flyoutcart = $(flyoutcartselector, $(data.flyoutshoppingcart));
+            $(flyoutcartselector).replaceWith(flyoutcart);
             $(topcartselector).html(data.totalproducts);
         },
         error: function (xhr, ajaxOptions, thrownError) {

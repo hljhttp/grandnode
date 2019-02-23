@@ -25,10 +25,16 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.WebEncoders;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
+using WebMarkupMin.AspNet.Common.UrlMatchers;
+using WebMarkupMin.AspNetCore2;
 
 namespace Grand.Framework.Infrastructure.Extensions
 {
@@ -348,6 +354,47 @@ namespace Grand.Framework.Infrastructure.Extensions
             hcBuilder.AddMongoDb(DataSettingsHelper.ConnectionString(),
                    name: "mongodb-check",
                    tags: new string[] { "mongodb" });
+        }
+
+        public static void AddHtmlMinification(this IServiceCollection services)
+        {
+            // Add WebMarkupMin services.
+            services.AddWebMarkupMin(options =>
+            {
+                options.AllowMinificationInDevelopmentEnvironment = true;
+                options.AllowCompressionInDevelopmentEnvironment = true;
+            })
+            .AddHtmlMinification(options =>
+            {
+                options.ExcludedPages = new List<IUrlMatcher> {
+                    new WildcardUrlMatcher("/admin/*"),
+                    new ExactUrlMatcher("/admin")
+                };
+            })
+            .AddXmlMinification(options =>
+            {
+                options.ExcludedPages = new List<IUrlMatcher> {
+                    new WildcardUrlMatcher("/admin/*"),
+                    new ExactUrlMatcher("/admin")
+                };
+            })
+            .AddHttpCompression();
+
+        }
+
+        /// <summary>
+        /// Adds services for WebEncoderOptions
+        /// </summary>
+        /// <param name="services">Collection of service descriptors</param>
+        public static void AddWebEncoder(this IServiceCollection services)
+        {
+            if (!DataSettingsHelper.DatabaseIsInstalled())
+                return;
+
+            services.Configure<WebEncoderOptions>(options =>
+            {
+                options.TextEncoderSettings = new TextEncoderSettings(UnicodeRanges.All);
+            });
         }
     }
 }

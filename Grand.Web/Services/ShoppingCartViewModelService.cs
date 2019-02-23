@@ -23,6 +23,7 @@ using Grand.Services.Seo;
 using Grand.Services.Shipping;
 using Grand.Services.Tax;
 using Grand.Web.Infrastructure.Cache;
+using Grand.Web.Interfaces;
 using Grand.Web.Models.Common;
 using Grand.Web.Models.Media;
 using Grand.Web.Models.ShoppingCart;
@@ -466,7 +467,7 @@ namespace Grand.Web.Services
                     decimal shoppingCartUnitPriceWithDiscountBase = _taxService.GetProductPrice(product, _priceCalculationService.GetUnitPrice(sci, true, out decimal discountAmount, appliedDiscounts: out List<AppliedDiscount> appliedDiscounts), out taxRate);
                     decimal shoppingCartUnitPriceWithDiscount = _currencyService.ConvertFromPrimaryStoreCurrency(shoppingCartUnitPriceWithDiscountBase, _workContext.WorkingCurrency);
 
-                    cartItemModel.UnitPriceWithoutDiscountValue = _currencyService.ConvertFromPrimaryStoreCurrency(_priceCalculationService.GetUnitPrice(sci, false), _workContext.WorkingCurrency);
+                    cartItemModel.UnitPriceWithoutDiscountValue = _currencyService.ConvertFromPrimaryStoreCurrency(_taxService.GetProductPrice(product, _priceCalculationService.GetUnitPrice(sci, false), out taxRate), _workContext.WorkingCurrency);
                     cartItemModel.UnitPriceWithoutDiscount = _priceFormatter.FormatPrice(cartItemModel.UnitPriceWithoutDiscountValue);
                     cartItemModel.UnitPriceValue = shoppingCartUnitPriceWithDiscount;
                     cartItemModel.UnitPrice = _priceFormatter.FormatPrice(shoppingCartUnitPriceWithDiscount);

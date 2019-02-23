@@ -13,7 +13,7 @@ using Grand.Services.Security;
 using Grand.Services.Seo;
 using Grand.Services.Stores;
 using Grand.Web.Models.Blogs;
-using Grand.Web.Services;
+using Grand.Web.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -81,7 +81,22 @@ namespace Grand.Web.Controllers
             var model = _blogViewModelService.PrepareBlogPostListModel(command);
             return View("List", model);
         }
+        public virtual IActionResult BlogByCategory(BlogPagingFilteringModel command)
+        {
+            if (!_blogSettings.Enabled)
+                return RedirectToRoute("HomePage");
 
+            var model = _blogViewModelService.PrepareBlogPostListModel(command);
+            return View("List", model);
+        }
+        public virtual IActionResult BlogByKeyword(BlogPagingFilteringModel command)
+        {
+            if (!_blogSettings.Enabled)
+                return RedirectToRoute("HomePage");
+
+            var model = _blogViewModelService.PrepareBlogPostListModel(command);
+            return View("List", model);
+        }
         public virtual IActionResult ListRss(string languageId)
         {
             var feed = new RssFeed(
